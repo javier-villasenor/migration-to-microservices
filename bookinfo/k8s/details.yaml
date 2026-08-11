@@ -1,0 +1,47 @@
+##################################################################################################
+# Details service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: details-svc
+  namespace: cdps-G5
+  labels:
+    app: details
+    service: details
+spec:
+  ports:
+  - port: 7070
+    name: http
+  selector:
+    app: details
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: details-v1
+  namespace: cdps-G5
+  labels:
+    app: details
+    version: v1
+spec:
+  replicas: 4  # Factor de replicación 4 según requisitos
+  selector:
+    matchLabels:
+      app: details
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: details
+        version: v1
+    spec:
+      containers:
+      - name: details
+        image: docker.io/istio/examples-bookinfo-details-v1:1.16.2
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: ENABLE_EXTERNAL_BOOK_SERVICE
+          value: "true"
+        ports:
+        - containerPort: 9080

@@ -1,0 +1,85 @@
+version: '3.8'
+
+
+# Definir la red personalizada cdps-net
+networks:
+  cdps-net:
+    driver: bridge
+
+
+services:
+  # Servicio ProductPage (Python)
+  productpage:
+    container_name: productpage_cdps_G5
+    image: cdps-productpage:gG5
+    build:
+      context: ./src/productpage
+      dockerfile: Dockerfile.micro
+    ports:
+      - "9080:9080"
+    environment:
+      - TEAM_ID=G5
+      - APP_OWNER=Ares-et-al
+      - DETAILS_HOSTNAME=details
+      - REVIEWS_HOSTNAME=reviews
+      - RATINGS_HOSTNAME=ratings
+    networks:
+      - cdps-net
+    depends_on:
+      - details
+      - reviews
+      - ratings
+    volumes:
+      - ./src/productpage:/opt/microservices
+
+
+  # Servicio Details (Ruby)
+  details:
+    container_name: details_cdps_G5
+    image: cdps-details:gG5
+    build:
+      context: ./src/details
+      dockerfile: Dockerfile
+    ports:
+      - "7070:7070"
+    environment:
+      - ENABLE_EXTERNAL_BOOK_SERVICE=true
+    networks:
+      - cdps-net
+    volumes:
+      - ./src/details:/opt/microservices
+
+
+  # Servicio Reviews (Java)
+  # NOTA: Solo una versión puede estar activa a la vez
+  # Cambiar la imagen a cdps-reviews-v2:gG5 o cdps-reviews-v3:gG5 para probar otras versiones
+  reviews:
+    container_name: reviews_cdps_G5
+    image: cdps-reviews-v1:gG5
+    environment:
+      - SERVICE_VERSION=v1 # Cambiar a v2 o v3 según la versión
+      - ENABLE_RATINGS=true
+      - RATINGS_HOSTNAME=ratings
+    ports:
+      - "9081:9080"
+    networks:
+      - cdps-net
+    depends_on:
+      - ratings
+
+
+  # Servicio Ratings (NodeJS)
+  ratings:
+    container_name: ratings_cdps_G5
+    image: cdps-ratings:gG5
+    build:
+      context: ./src/ratings
+      dockerfile: Dockerfile
+    ports:
+      - "9082:9080"
+    environment:
+      - APP_VERSION=v1
+    networks:
+      - cdps-net
+    volumes:
+      - ./src/ratings:/opt/microservices
