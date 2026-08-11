@@ -110,9 +110,11 @@ kubectl apply -f k8s/productpage.yaml
 kubectl get all -n cdps-g5
 ```
 
-## 🔍 Análisis Post-Mortem y Known Issues
+## 🔍 Auditoría Técnica y Lecciones Aprendidas (Troubleshooting)
 
-Como parte del ejercicio de auditoría técnica posterior al despliegue en Kubernetes, se identificaron fallos de enrutamiento y Service Discovery. Se documentan a continuación a modo de _troubleshooting_:
+> **⚠️ Disclaimer:** Este repositorio refleja en la rama `main` el código exacto de la entrega académica original. Como parte de una auditoría técnica posterior al despliegue, se aislaron problemas de configuración que se corregirían en un entorno de staging previo a producción.
+
+Durante la migración, la topología distribuida presentó retos técnicos interesantes que requirieron un _troubleshooting_ a bajo nivel para estabilizar el clúster. Algunos de los problemas diagnosticados incluyen:
 
 1. **Fallo L4 en el enrutamiento del contenedor (Details)**:
    - _Síntoma_: La aplicación mostraba el error _"Error fetching product details!"_ a pesar de que los pods estaban en estado `Running`.
@@ -122,4 +124,4 @@ Como parte del ejercicio de auditoría técnica posterior al despliegue en Kuber
 3. **Uso mixto de imágenes Upstream vs Custom**:
    - Algunos contenedores en los archivos YAML del despliegue K8s apuntan a imágenes comunitarias directamente (ej. `docker.io/istio/examples-bookinfo-details-v1:1.16.2`) en lugar de a los _registry_ privados de las imágenes construidas a partir de los `Dockerfiles` del proyecto.
 
-> **💡 Conclusión Post-Análisis**: La identificación de estos problemas resalta la importancia crucial de que las declaraciones estáticas en los manifiestos YAML (puertos, namespaces, nombres) sean un reflejo milimétrico de la realidad operativa del contenedor. Escalar recursos mediante el orquestador (alta disponibilidad) pierde su sentido si las reglas L4 y el Service Discovery no están debidamente acopladas.
+> **💡 Resolución y Fixes Propuestos**: La identificación de estos problemas resalta la importancia crucial de que las declaraciones estáticas en los manifiestos YAML sean un reflejo milimétrico de la realidad operativa del contenedor. **Los parches declarativos para estos errores han sido aislados en la rama `fix/k8s-routing-and-dns` y propuestos en el Pull Request #1**, a la espera de disponer de un entorno efímero de _staging_ para su validación final antes de mergear a `main`.
