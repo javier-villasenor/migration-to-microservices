@@ -45,19 +45,37 @@ La aplicación es un entorno políglota, lo que requirió abordar los desafíos 
 - **Contenerización asimétrica y hardening**: Diseño de `Dockerfiles` específicos para cada tecnología utilizando imágenes base `-slim` para reducir drásticamente el peso de las imágenes y la superficie de ataque.
 - **Inyección de dependencias en tiempo de ejecución**: Desacoplamiento absoluto del enrutamiento. Los microservicios no poseen IPs hardcodeadas, toda la topología se mapea dinámicamente mediante variables de entorno (ej. `DETAILS_HOSTNAME`, `RATINGS_HOSTNAME`) para la resolución interna por DNS.
 
-## 🚀 Despliegue y Reproducibilidad
+## 🚀 Evolución y Fases de Ejecución
 
-A continuación se detalla el procedimiento de despliegue para los distintos entornos. Los manifiestos y archivos de configuración se encuentran en los directorios correspondientes.
+Este repositorio está diseñado para mostrar la evolución arquitectónica completa del proyecto. A continuación se detalla cómo ejecutar cada una de las fases de la migración utilizando la misma base de código.
 
-### 1. Entorno de Desarrollo (Docker Compose)
+### Fase 1: El Monolito (Ejecución Nativa)
 
-Para pruebas locales, se orquesta toda la solución segmentada utilizando `docker-compose`.
+La aplicación original funciona como un monolito en Python. Para ejecutar esta versión _legacy_, necesitas instalar sus dependencias y arrancar el script principal.
 
 ```bash
-# Navegar al repositorio
-cd bookinfo
+# 1. Instalar dependencias del monolito
+pip install -r src/productpage/requirements.txt
 
-# Levantar todos los servicios
+# 2. Ejecutar la aplicación monolítica
+python src/productpage/productpage_monolith.py
+```
+
+### Fase 2: Contenerización Individual (Docker)
+
+Antes de orquestar, los componentes se contenerizan de manera independiente. Puedes construir la imagen de cualquier microservicio usando su `Dockerfile` respectivo.
+
+```bash
+# Ejemplo: Construir la imagen del microservicio details (Ruby)
+docker build -t details-microservice ./src/details/
+```
+
+### Fase 3: Microservicios Locales (Docker Compose)
+
+Para pruebas locales de la arquitectura ya segmentada en microservicios, orquestamos la solución utilizando `docker-compose`.
+
+```bash
+# Levantar todos los servicios en segundo plano
 sudo docker-compose -f docker-compose.micro.yml up -d
 
 # Ver el estado y progreso
@@ -65,9 +83,9 @@ sudo docker-compose -f docker-compose.micro.yml ps
 sudo docker-compose -f docker-compose.micro.yml logs -f
 ```
 
-### 2. Entorno de Producción (Kubernetes - GKE)
+### Fase 4: Producción y Alta Disponibilidad (Kubernetes - GKE)
 
-Despliegue del escenario completo en un orquestador.
+Despliegue del escenario completo distribuido en un orquestador para garantizar tolerancia a fallos.
 
 ```bash
 # Crear cluster GKE con 3 nodos
@@ -81,13 +99,12 @@ gcloud container clusters create bookinfo-cluster \
 gcloud container clusters get-credentials bookinfo-cluster --zone=europe-west1-b
 
 # Desplegar topología
-cd k8s/
-kubectl apply -f namespace.yaml
-kubectl apply -f ratings.yaml
-kubectl apply -f reviews-svc.yaml
-kubectl apply -f reviews-v1-deployment.yaml
-kubectl apply -f details.yaml
-kubectl apply -f productpage.yaml
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/ratings.yaml
+kubectl apply -f k8s/reviews-svc.yaml
+kubectl apply -f k8s/reviews-v1-deployment.yaml
+kubectl apply -f k8s/details.yaml
+kubectl apply -f k8s/productpage.yaml
 
 # Comprobar estado del despliegue
 kubectl get all -n cdps-g5
