@@ -5,7 +5,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: details-svc
-  namespace: cdps-G5
+  namespace: cdps-g5
   labels:
     app: details
     service: details
@@ -20,7 +20,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: details-v1
-  namespace: cdps-G5
+  namespace: cdps-g5
   labels:
     app: details
     version: v1
@@ -44,4 +44,4 @@ spec:
         - name: ENABLE_EXTERNAL_BOOK_SERVICE
           value: "true"
         ports:
-        - containerPort: 9080
+        - containerPort: 7070

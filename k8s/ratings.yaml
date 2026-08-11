@@ -5,7 +5,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ratings-svc
-  namespace: cdps-G5
+  namespace: cdps-g5
   labels:
     app: ratings
     service: ratings
@@ -20,7 +20,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ratings-v1
-  namespace: cdps-G5
+  namespace: cdps-g5
   labels:
     app: ratings
     version: v1
