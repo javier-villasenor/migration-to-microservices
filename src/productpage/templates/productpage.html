@@ -25,13 +25,13 @@
   });
 </script>
 {% endblock %}
-{% block title %}Simple Bookstore App{% endblock %}
+{% block title %}{{ team_id }} - {{ app_owner }} - Simple Bookstore App{% endblock %}
 {% block content %}
 
 <nav class="navbar navbar-inverse navbar-static-top">
   <div class="container">
     <div class="navbar-header">
-      <a class="navbar-brand" href="#">BookInfo Sample</a>
+      <a class="navbar-brand" href="#">{{ team_id }} - {{ app_owner }} - BookInfo Sample</a>
     </div>
     {% if user: %}
     <p class="navbar-text navbar-right">
