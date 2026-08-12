@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script de instalación automática de la aplicación BookInfo
-Para la Práctica Creativa 2 - Parte 1
+Despliegue del Monolito (Fase 1)
 Grupo: GRUPO G5
 
 
@@ -16,7 +16,7 @@ Uso:
 Requisitos:
     - Ejecutar en una VM de Google Cloud (Debian/Ubuntu)
     - Tener permisos de superusuario (sudo)
-    - Tener el repositorio practica_creativa2 en el mismo directorio que este script
+    - Ejecutar desde la raíz del proyecto (donde se encuentra la carpeta src/)
 """
 
 
@@ -31,7 +31,7 @@ from pathlib import Path
 TEAM_ID = "GRUPO G5"
 APP_PORT = 8080
 APP_DIR = "/opt/bookinfo"
-REPO_DIR = "practica_creativa2/bookinfo/src/productpage"
+REPO_DIR = "src/productpage"
 SERVICE_NAME = "bookinfo"
 
 
@@ -160,8 +160,8 @@ def copy_application():
    
     # Verificar que existe el directorio del repositorio
     if not os.path.exists(REPO_DIR):
-        print_error(f"No se encuentra el directorio del repositorio: {REPO_DIR}")
-        print("Asegúrate de que el repositorio practica_creativa2 esté en el mismo directorio que este script")
+        print_error(f"No se encuentra el directorio de la aplicación: {REPO_DIR}")
+        print("Asegúrate de ejecutar este script desde la raíz del proyecto (donde está la carpeta src/)")
         sys.exit(1)
    
     # Crear directorio de instalación si no existe
@@ -348,7 +348,7 @@ def main():
     try:
         print(f"\n{Colors.HEADER}{Colors.BOLD}")
         print("╔════════════════════════════════════════════════════════════╗")
-        print("║   Instalación Automática de BookInfo - Práctica Creativa 2   ║")
+        print("║   Instalación Automática de BookInfo - Monolito   ║")
         print(f"║   Grupo: {TEAM_ID:^49} ║")
         print("╚════════════════════════════════════════════════════════════╝")
         print(f"{Colors.ENDC}\n")

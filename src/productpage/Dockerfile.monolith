@@ -3,7 +3,7 @@ FROM python:3.9-slim
 
 # Información del mantenedor
 LABEL maintainer="GRUPO G5"
-LABEL description="BookInfo ProductPage - Práctica Creativa 2"
+LABEL description="BookInfo ProductPage Monolith"
 
 # Establecer directorio de trabajo
 WORKDIR /app

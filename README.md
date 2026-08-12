@@ -72,7 +72,7 @@ Este repositorio está diseñado para mostrar la evolución arquitectónica comp
 La aplicación original funciona como un monolito en Python. Para ejecutar esta versión _legacy_, necesitas instalar sus dependencias y arrancar el script principal.
 
 ```bash
-# Opción A: Aprovisionamiento automatizado en VM GCP (Según Enunciado Punto 1)
+# Opción A: Aprovisionamiento automatizado en VM GCP (Fase 1)
 python scripts/vm_setup.py
 
 # Opción B: Ejecución local directa del monolito
