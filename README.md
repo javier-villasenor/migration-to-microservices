@@ -45,6 +45,24 @@ La aplicación es un entorno políglota, lo que requirió abordar los desafíos 
 - **Contenerización asimétrica y hardening**: Diseño de `Dockerfiles` específicos para cada tecnología utilizando imágenes base `-slim` para reducir drásticamente el peso de las imágenes y la superficie de ataque.
 - **Inyección de dependencias en tiempo de ejecución**: Desacoplamiento absoluto del enrutamiento. Los microservicios no poseen IPs hardcodeadas, toda la topología se mapea dinámicamente mediante variables de entorno (ej. `DETAILS_HOSTNAME`, `RATINGS_HOSTNAME`) para la resolución interna por DNS.
 
+## 📁 Estructura del Repositorio
+
+```text
+├── docker-compose.micro.yml   # Orquestación local de microservicios (Fase 3)
+├── k8s/                       # Manifiestos de Kubernetes para GKE (Fase 4)
+├── scripts/
+│   └── vm_setup.py            # Script de automatización para VM en GCP (Fase 1)
+└── src/                       # Código fuente de los microservicios
+    ├── details/               # Servicio Details (Ruby)
+    ├── productpage/           # Servicio ProductPage (Python)
+    │   ├── Dockerfile         # Dockerfile para microservicio (Fase 3/4)
+    │   ├── Dockerfile.monolith# Dockerfile para el monolito (Fase 2)
+    │   ├── productpage.py     # Código microservicio
+    │   └── productpage_monolith.py # Código monolito
+    ├── ratings/               # Servicio Ratings (NodeJS)
+    └── reviews/               # Servicio Reviews (Java)
+```
+
 ## 🚀 Evolución y Fases de Ejecución
 
 Este repositorio está diseñado para mostrar la evolución arquitectónica completa del proyecto. A continuación se detalla cómo ejecutar cada una de las fases de la migración utilizando la misma base de código.
@@ -54,20 +72,24 @@ Este repositorio está diseñado para mostrar la evolución arquitectónica comp
 La aplicación original funciona como un monolito en Python. Para ejecutar esta versión _legacy_, necesitas instalar sus dependencias y arrancar el script principal.
 
 ```bash
-# 1. Instalar dependencias del monolito
-pip install -r src/productpage/requirements.txt
+# Opción A: Aprovisionamiento automatizado en VM GCP (Según Enunciado Punto 1)
+python scripts/vm_setup.py
 
-# 2. Ejecutar la aplicación monolítica
-python src/productpage/productpage_monolith.py
+# Opción B: Ejecución local directa del monolito
+pip install -r src/productpage/requirements.txt
+python src/productpage/productpage_monolith.py 9090
 ```
 
 ### Fase 2: Contenerización Individual (Docker)
 
-Antes de orquestar, los componentes se contenerizan de manera independiente. Puedes construir la imagen de cualquier microservicio usando su `Dockerfile` respectivo.
+Antes de orquestar, los componentes se contenerizan de manera independiente. Puedes construir la imagen del monolito usando su `Dockerfile` original.
 
 ```bash
-# Ejemplo: Construir la imagen del microservicio details (Ruby)
-docker build -t details-microservice ./src/details/
+# 1. Construir la imagen Docker del monolito (usando Dockerfile.monolith)
+docker build -f src/productpage/Dockerfile.monolith -t cdps-productpage:gG5 ./src/productpage
+
+# 2. Desplegar el contenedor en el puerto 9095 (mapeado al 8080 interno)
+docker run --name productpage_cdps_G5 -p 9095:8080 -e TEAM_ID=G5 -e APP_OWNER=Ares-et-al -d cdps-productpage:gG5
 ```
 
 ### Fase 3: Microservicios Locales (Docker Compose)
