@@ -63,6 +63,10 @@ reviewsHostname = "reviews" if (os.environ.get("REVIEWS_HOSTNAME") is None) else
 
 flood_factor = 0 if (os.environ.get("FLOOD_FACTOR") is None) else int(os.environ.get("FLOOD_FACTOR"))
 
+# Get team ID and app owner from environment variables
+team_id = os.environ.get("TEAM_ID", "NO_TEAM_ID")
+app_owner = os.environ.get("APP_OWNER", "NO_OWNER")
+
 details = {
     "name": "http://{0}{1}:9080".format(detailsHostname, servicesDomain),
     "endpoint": "details",
@@ -249,7 +253,7 @@ def index():
     table = json2html.convert(json=json.dumps(productpage),
                               table_attributes="class=\"table table-condensed table-bordered table-hover\"")
 
-    return render_template('index.html', serviceTable=table)
+    return render_template('index.html', serviceTable=table, team_id=team_id, app_owner=app_owner)
 
 
 @app.route('/health')
@@ -313,7 +317,9 @@ def front():
         product=product,
         details=details,
         reviews={"R1":"OK"},
-        user=user)
+        user=user,
+        team_id=team_id,
+        app_owner=app_owner)
 
 
 # The API:
