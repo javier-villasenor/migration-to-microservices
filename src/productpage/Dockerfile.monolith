@@ -1,0 +1,24 @@
+# Usar imagen base oficial de Python 3.9 slim
+FROM python:3.9-slim
+
+# Información del mantenedor
+LABEL maintainer="GRUPO G5"
+LABEL description="BookInfo ProductPage - Práctica Creativa 2"
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Copiar requirements.txt primero (para aprovechar cache de Docker)
+COPY requirements.txt .
+
+# Instalar dependencias
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar el resto de la aplicación
+COPY . .
+
+# Exponer puerto 8080
+EXPOSE 8080
+
+# Comando para ejecutar la aplicación
+CMD ["python", "productpage_monolith.py", "8080"]

@@ -1,3 +1,9 @@
 __pycache__/
 *.zip
 .DS_Store
+
+# Java / Gradle binaries
+*.class
+bin/
+build/
+.gradle/

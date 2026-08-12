@@ -14,7 +14,7 @@ services:
     image: cdps-productpage:gG5
     build:
       context: ./src/productpage
-      dockerfile: Dockerfile.micro
+      dockerfile: Dockerfile
     ports:
       - "9080:9080"
     environment:
