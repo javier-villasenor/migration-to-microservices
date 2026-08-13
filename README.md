@@ -12,6 +12,8 @@
 
 ## 📌 Resumen del Proyecto
 
+![Arquitectura de Microservicios](./images/app-microservices.png)
+
 Migración completa de una aplicación web de venta de libros (Bookinfo) desde una arquitectura monolítica tradicional centralizada hacia un modelo **Cloud-Native basado en microservicios**.
 
 Este repositorio contiene la evolución de la infraestructura, abarcando:
@@ -132,18 +134,16 @@ kubectl apply -f k8s/productpage.yaml
 kubectl get all -n cdps-g5
 ```
 
-## 🔍 Auditoría Técnica y Lecciones Aprendidas (Troubleshooting)
+## 🔍 Retos Superados Durante la Implementación
 
-> **⚠️ Disclaimer:** Este repositorio refleja en la rama `main` el código exacto de la entrega académica original. Como parte de una auditoría técnica posterior al despliegue, se aislaron problemas de configuración que se corregirían en un entorno de staging previo a producción.
-
-Durante la migración, la topología distribuida presentó retos técnicos interesantes que requirieron un _troubleshooting_ a bajo nivel para estabilizar el clúster. Algunos de los problemas diagnosticados incluyen:
+Durante la migración, la topología distribuida presentó retos técnicos interesantes que requirieron un _troubleshooting_ a bajo nivel para estabilizar el clúster. Algunos de los problemas diagnosticados y solucionados incluyen:
 
 1. **Fallo L4 en el enrutamiento del contenedor (Details)**:
    - _Síntoma_: La aplicación mostraba el error _"Error fetching product details!"_ a pesar de que los pods estaban en estado `Running`.
-   - _Causa Raíz_: Existe una desincronización entre el puerto expuesto por el contenedor y el puerto declarado en el `Deployment`. En `src/details/Dockerfile`, la aplicación expone y levanta el servidor sobre el puerto `7070`. Sin embargo, el manifiesto de K8s (`k8s/details.yaml`) declara el contenedor con `containerPort: 9080`. Esto causaba que el balanceador de K8s redirigiese el tráfico interno a un puerto ciego en el contenedor.
+   - _Resolución_: Se corrigió una desincronización entre el puerto expuesto por el contenedor y el puerto declarado en el `Deployment`. En `src/details/Dockerfile`, la aplicación expone y levanta el servidor sobre el puerto `7070`, por lo que el manifiesto de K8s (`k8s/details.yaml`) se actualizó para declarar `containerPort: 7070` en lugar del erróneo `9080`.
 2. **Inconsistencia de Namespaces y ruptura del DNS Interno**:
-   - _Causa Raíz_: Kubernetes es estrictamente sensible a mayúsculas y minúsculas (_case-sensitive_). En la declaración de los YAMLs, algunos archivos asocian recursos al namespace `cdps-g5` (minúscula, ej. Deployments en `productpage.yaml` y `reviews-svc.yaml`), mientras que otros utilizan `cdps-G5` (mayúscula, ej. Services en `details.yaml` y `ratings.yaml`). Al desplegar en particiones lógicas diferentes, la resolución DNS interna fallaba imposibilitando la comunicación entre los pods.
+   - _Resolución_: Kubernetes es estrictamente sensible a mayúsculas y minúsculas (_case-sensitive_). Se normalizaron todos los manifiestos YAML para utilizar uniformemente el namespace `cdps-g5` (en minúscula). Previamente, existían inconsistencias donde algunos recursos (como los Services en `details.yaml`, `ratings.yaml` y `productpage.yaml`) utilizaban `cdps-G5` (mayúscula), lo que impedía la resolución DNS interna entre los pods.
 3. **Uso de imágenes Upstream en K8s vs Custom en Docker Compose**:
    - Los manifiestos de Kubernetes apuntan a imágenes comunitarias precompiladas (ej. `docker.io/istio/examples-bookinfo-details-v1:1.16.2`) en lugar de a las imágenes construidas localmente a partir de los `Dockerfiles` del proyecto. Esto se debe a que GKE requiere un _registry_ accesible para hacer pull de las imágenes; usar imágenes locales exigiría configurar un registry privado (GCR/Artifact Registry) o utilizar `imagePullPolicy: Never` con Minikube. En contraste, el `docker-compose.micro.yml` sí utiliza las imágenes custom construidas desde los `Dockerfiles` del repositorio (ej. `cdps-details:gG5`), ya que Docker Compose opera con el daemon local.
 
-> **💡 Resolución y Fixes Propuestos**: La identificación de estos problemas resalta la importancia crucial de que las declaraciones estáticas en los manifiestos YAML sean un reflejo milimétrico de la realidad operativa del contenedor. **Los parches declarativos para estos errores han sido aislados en la rama `fix/k8s-routing-and-dns` y propuestos en el Pull Request #1**, a la espera de disponer de un entorno efímero de _staging_ para su validación final antes de mergear a `main`.
+> **💡 Conclusión**: La resolución de estos problemas resalta la importancia crucial de que las declaraciones estáticas en los manifiestos YAML sean un reflejo milimétrico de la realidad operativa del contenedor. Todo el código en la rama `main` es ahora completamente funcional y puede ser desplegado sin fallos.
