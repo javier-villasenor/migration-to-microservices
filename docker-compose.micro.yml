@@ -53,9 +53,14 @@ services:
   # Servicio Reviews (Java)
   # NOTA: Solo una versión puede estar activa a la vez
   # Cambiar la imagen a cdps-reviews-v2:gG5 o cdps-reviews-v3:gG5 para probar otras versiones
+  # PREREQUISITO: Compilar con Gradle antes de hacer build:
+  #   docker run --rm -u root -v "$(pwd)/src/reviews":/home/gradle/project -w /home/gradle/project gradle:4.8.1 gradle clean build
   reviews:
     container_name: reviews_cdps_G5
     image: cdps-reviews-v1:gG5
+    build:
+      context: ./src/reviews/reviews-wlpcfg
+      dockerfile: Dockerfile
     environment:
       - SERVICE_VERSION=v1 # Cambiar a v2 o v3 según la versión
       - ENABLE_RATINGS=true
